@@ -1,4 +1,4 @@
-# Engie Perú · Mantenimiento Predictivo Aerogeneradores
+# Mantenimiento Predictivo Aerogeneradores
 
 POC de **mantenimiento predictivo** para parque eólico (aerogeneradores AEG_51 y AEG_52) usando datos SCADA reales. Detecta **derateo** (sub-desempeño) y genera **alertas tempranas** semanas antes del evento, siguiendo el enfoque del acelerador oficial de Databricks para turbinas eólicas.
 

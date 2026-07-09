@@ -1,7 +1,7 @@
 resources:
   jobs:
     engie_peru_pdm_pipeline:
-      name: "Engie Peru - PdM Aerogeneradores POC"
+      name: "PdM Aerogeneradores POC"
       max_concurrent_runs: 1
       queue:
         enabled: true
@@ -18,7 +18,7 @@ resources:
             source: WORKSPACE
 
     engie_peru_pdm_wrap_proba:
-      name: "Engie PdM - proba wrapper"
+      name: "PdM - proba wrapper"
       max_concurrent_runs: 1
       queue:
         enabled: true

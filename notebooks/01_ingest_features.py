@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Engie Perú · Mantenimiento Predictivo Aerogeneradores
+# MAGIC # Mantenimiento Predictivo Aerogeneradores
 # MAGIC ## 01 · Ingesta (Bronze) + Features (Silver)
 # MAGIC
 # MAGIC Lee la data SCADA real (AEG_51, AEG_52 · jul-2025 → jun-2026 · cadencia 1 min),

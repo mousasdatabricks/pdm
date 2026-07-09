@@ -108,7 +108,7 @@ A lo largo de la guía sustituye estos placeholders:
 USE CATALOG TU_CATALOGO;
 
 CREATE SCHEMA IF NOT EXISTS engie_peru_pdm
-  COMMENT 'POC Mantenimiento Predictivo — Aerogeneradores Engie Perú';
+  COMMENT 'POC Mantenimiento Predictivo — Aerogeneradores';
 ```
 
 4. Clic en **Run** (o `Ctrl+Enter` / `Cmd+Enter`)
@@ -296,7 +296,7 @@ El Job ejecuta los notebooks **01** y **02** en secuencia.
 
 | Campo | Valor |
 |-------|-------|
-| **Job name** | `Engie Peru - PdM Aerogeneradores POC` |
+| **Job name** | `PdM Aerogeneradores POC` |
 | **Description (opcional)** | Pipeline ingesta + modelo PdM |
 
 ### 7.3 Tarea 1 — Ingesta
@@ -354,7 +354,7 @@ Si `pdm_model` no depende de `ingest_features`, edita la tarea 2 → sección **
 
 ### 8.1 Lanzar la ejecución
 
-1. Abre el Job **Engie Peru - PdM Aerogeneradores POC**
+1. Abre el Job **PdM Aerogeneradores POC**
 2. Clic en **Run now** (arriba a la derecha)
 3. Se abrirá la vista de **Run** con el estado de cada tarea
 
@@ -415,7 +415,7 @@ Este paso registra la **versión 2** del modelo, que devuelve probabilidad (0–
 
 | Campo | Valor |
 |-------|-------|
-| **Job name** | `Engie PdM - proba wrapper` |
+| **Job name** | `PdM - proba wrapper` |
 | **Task name** | `wrap` |
 | **Type** | `Notebook` |
 | **Path** | `/Users/.../engie_peru_pdm/03_wrap_proba` |
@@ -532,7 +532,7 @@ Permite llamar al modelo vía API REST (integración con apps, alertas, etc.).
 
 Para actualizar datos y predicciones de forma periódica:
 
-1. Abre el Job **Engie Peru - PdM Aerogeneradores POC**
+1. Abre el Job **PdM Aerogeneradores POC**
 2. Clic en **Edit**
 3. Sección **Schedules** → **Add schedule**
 4. Configura:

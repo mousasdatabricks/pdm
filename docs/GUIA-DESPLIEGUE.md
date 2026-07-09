@@ -1,4 +1,4 @@
-# Guía de despliegue — Engie Perú PdM (CLI + Asset Bundle)
+# Guía de despliegue — PdM Aerogeneradores (CLI + Asset Bundle)
 
 Esta guía explica cómo desplegar el proyecto **Mantenimiento Predictivo Aerogeneradores** usando la **Databricks CLI** y **Asset Bundles**.
 
@@ -158,8 +158,8 @@ Esto sube los notebooks al workspace y crea dos jobs:
 
 | Job | Tareas |
 |-----|--------|
-| **Engie Peru - PdM Aerogeneradores POC** | `01_ingest_features` → `02_pdm_model` |
-| **Engie PdM - proba wrapper** | `03_wrap_proba` |
+| **PdM Aerogeneradores POC** | `01_ingest_features` → `02_pdm_model` |
+| **PdM - proba wrapper** | `03_wrap_proba` |
 
 ---
 
@@ -178,9 +178,9 @@ databricks bundle run engie_peru_pdm_wrap_proba -t dev --profile mi-perfil
 ### Desde la UI
 
 1. **Workflows** → **Jobs**.
-2. Abre **Engie Peru - PdM Aerogeneradores POC**.
+2. Abre **PdM Aerogeneradores POC**.
 3. Clic en **Run now**.
-4. Cuando termine con éxito, ejecuta **Engie PdM - proba wrapper**.
+4. Cuando termine con éxito, ejecuta **PdM - proba wrapper**.
 
 **Orden obligatorio:** primero el pipeline principal, luego el wrapper.
 
