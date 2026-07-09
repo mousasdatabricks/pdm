@@ -1,0 +1,826 @@
+{
+  "datasets": [
+    {
+      "name": "ds_kpis",
+      "displayName": "KPIs",
+      "queryLines": [
+        "SELECT (SELECT SUM(energia_perdida_kWh_aprox) FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_derate_events) AS energia_no_generada_kWh, (SELECT valor FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_model_metrics WHERE metrica='roc_auc') AS roc_auc, (SELECT COUNT(DISTINCT turbine) FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_health_timeline) AS n_turbinas, (SELECT COUNT(*) FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_derate_events WHERE intervalos_derateo_10min > 0) AS dias_con_derateo"
+      ]
+    },
+    {
+      "name": "ds_health_daily",
+      "displayName": "Health diario por turbina",
+      "queryLines": [
+        "SELECT turbine, DATE(ts) AS dia, AVG(health_index) AS health_index_avg FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_health_timeline GROUP BY turbine, DATE(ts)"
+      ]
+    },
+    {
+      "name": "ds_powerratio_daily",
+      "displayName": "Power ratio diario (produciendo)",
+      "queryLines": [
+        "SELECT turbine, DATE(ts) AS dia, AVG(power_ratio) AS power_ratio_avg FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_health_timeline WHERE producing = 1 GROUP BY turbine, DATE(ts)"
+      ]
+    },
+    {
+      "name": "ds_energy_turbine",
+      "displayName": "Energia no generada por turbina",
+      "queryLines": [
+        "SELECT turbine, SUM(energia_perdida_kWh_aprox) AS energia_perdida_kWh FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_derate_events GROUP BY turbine"
+      ]
+    },
+    {
+      "name": "ds_drivers",
+      "displayName": "Top drivers de alerta",
+      "queryLines": [
+        "SELECT feature, importancia FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_alert_drivers ORDER BY importancia DESC LIMIT 12"
+      ]
+    },
+    {
+      "name": "ds_top_days",
+      "displayName": "Top dias por energia perdida",
+      "queryLines": [
+        "SELECT CONCAT(turbine, ' | ', CAST(dia AS STRING)) AS turbina_dia, energia_perdida_kWh_aprox FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_derate_events ORDER BY energia_perdida_kWh_aprox DESC LIMIT 15"
+      ]
+    },
+    {
+      "name": "ds_alert_table",
+      "displayName": "Alertas (alert_score > 0.6)",
+      "queryLines": [
+        "SELECT turbine, ts, health_index, alert_score, power_ratio FROM serverless_stable_cvpomp_catalog.engie_peru_pdm.gold_health_timeline WHERE alert_score > 0.6 ORDER BY ts DESC LIMIT 200"
+      ]
+    },
+    {
+      "name": "bb34131a",
+      "displayName": "Energía Perdida por Mes",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  DATE_TRUNC('month', CAST(SPLIT(`turbina_dia`, ' \\\\| ')[1] AS DATE)) as mes,\n",
+        "  SUM(`energia_perdida_kWh_aprox`) as energia_perdida_total_kWh\n",
+        "FROM `top_dias_por_energia_perdida_ds_top_days`\n",
+        "GROUP BY DATE_TRUNC('month', CAST(SPLIT(`turbina_dia`, ' \\\\| ')[1] AS DATE))\n",
+        "ORDER BY energia_perdida_total_kWh DESC\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "page_main",
+      "displayName": "Resumen",
+      "layout": [
+        {
+          "widget": {
+            "name": "subtitle",
+            "multilineTextboxSpec": {
+              "lines": [
+                "#### Mantenimiento Predictivo — Aerogeneradores Perú"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-energia",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_kpis",
+                  "fields": [
+                    {
+                      "name": "energia_no_generada_kWh",
+                      "expression": "`energia_no_generada_kWh`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "energia_no_generada_kWh",
+                  "displayName": "Energia no generada (kWh)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Energia no generada (kWh)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-rocauc",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_kpis",
+                  "fields": [
+                    {
+                      "name": "roc_auc",
+                      "expression": "`roc_auc`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "roc_auc",
+                  "displayName": "ROC-AUC"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "ROC-AUC del modelo"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-turbinas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_kpis",
+                  "fields": [
+                    {
+                      "name": "n_turbinas",
+                      "expression": "`n_turbinas`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "n_turbinas",
+                  "displayName": "Turbinas"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Nº de turbinas"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi-dias",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_kpis",
+                  "fields": [
+                    {
+                      "name": "dias_con_derateo",
+                      "expression": "`dias_con_derateo`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "dias_con_derateo",
+                  "displayName": "Días con derateo"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Días con derateo"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 1,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "sec-tendencias",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Tendencias diarias"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "chart-health",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_health_daily",
+                  "fields": [
+                    {
+                      "name": "turbine",
+                      "expression": "`turbine`"
+                    },
+                    {
+                      "name": "dia",
+                      "expression": "`dia`"
+                    },
+                    {
+                      "name": "health_index_avg",
+                      "expression": "`health_index_avg`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Health index promedio diario por turbina"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "dia",
+                  "displayName": "Dia",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "health_index_avg",
+                  "displayName": "Health index",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "turbine",
+                  "displayName": "Turbina",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "chart-powerratio",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_powerratio_daily",
+                  "fields": [
+                    {
+                      "name": "turbine",
+                      "expression": "`turbine`"
+                    },
+                    {
+                      "name": "dia",
+                      "expression": "`dia`"
+                    },
+                    {
+                      "name": "power_ratio_avg",
+                      "expression": "`power_ratio_avg`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Power ratio promedio diario por turbina (produciendo)"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "dia",
+                  "displayName": "Dia",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "power_ratio_avg",
+                  "displayName": "Power ratio",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "turbine",
+                  "displayName": "Turbina",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "sec-energia",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Energia perdida y drivers"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "bar-energia-turbina",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_energy_turbine",
+                  "fields": [
+                    {
+                      "name": "turbine",
+                      "expression": "`turbine`"
+                    },
+                    {
+                      "name": "sum(energia_perdida_kWh)",
+                      "expression": "SUM(`energia_perdida_kWh`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Energia no generada por turbina"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "turbine",
+                  "displayName": "Turbina",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(energia_perdida_kWh)",
+                  "displayName": "Energia perdida (kWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar-drivers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_drivers",
+                  "fields": [
+                    {
+                      "name": "sum(importancia)",
+                      "expression": "SUM(`importancia`)"
+                    },
+                    {
+                      "name": "feature",
+                      "expression": "`feature`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Top 12 drivers de alerta"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(importancia)",
+                  "displayName": "Importancia",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "feature",
+                  "displayName": "Feature",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar-top-dias",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_top_days",
+                  "fields": [
+                    {
+                      "name": "turbina_dia",
+                      "expression": "`turbina_dia`"
+                    },
+                    {
+                      "name": "sum(energia_perdida_kWh_aprox)",
+                      "expression": "SUM(`energia_perdida_kWh_aprox`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Top 15 dias por energia perdida"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "turbina_dia",
+                  "displayName": "Turbina | Dia",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(energia_perdida_kWh_aprox)",
+                  "displayName": "Energia perdida (kWh)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "sec-detalle",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Detalle de alertas"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "table-alertas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_alert_table",
+                  "fields": [
+                    {
+                      "name": "turbine",
+                      "expression": "`turbine`"
+                    },
+                    {
+                      "name": "ts",
+                      "expression": "`ts`"
+                    },
+                    {
+                      "name": "health_index",
+                      "expression": "`health_index`"
+                    },
+                    {
+                      "name": "alert_score",
+                      "expression": "`alert_score`"
+                    },
+                    {
+                      "name": "power_ratio",
+                      "expression": "`power_ratio`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "turbine",
+                    "displayName": "Turbina"
+                  },
+                  {
+                    "fieldName": "ts",
+                    "displayName": "Timestamp"
+                  },
+                  {
+                    "fieldName": "health_index",
+                    "displayName": "Health index"
+                  },
+                  {
+                    "fieldName": "alert_score",
+                    "displayName": "Alert score"
+                  },
+                  {
+                    "fieldName": "power_ratio",
+                    "displayName": "Power ratio"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Alertas (alert_score > 0.6, ultimas 200)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 25,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "1366637d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bb34131a",
+                  "fields": [
+                    {
+                      "name": "mes",
+                      "expression": "`mes`"
+                    },
+                    {
+                      "name": "energia_perdida_total_kWh",
+                      "expression": "`energia_perdida_total_kWh`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Energía Perdida por Mes",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "mes",
+                  "axis": {
+                    "title": "Mes"
+                  },
+                  "format": {
+                    "type": "date",
+                    "date": "locale-short-month"
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "energia_perdida_total_kWh",
+                  "axis": {
+                    "title": "Energía Perdida (kWh)"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 32,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#F5F9FC"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF"
+      },
+      "widgetBorderColor": {
+        "light": "#D6E4ED"
+      },
+      "fontColor": {
+        "light": "#00205B"
+      },
+      "selectionColor": {
+        "light": "#00AAFF"
+      },
+      "visualizationColors": [
+        "#00AAFF",
+        "#78BE20",
+        "#003399",
+        "#A0CF67",
+        "#FFD100",
+        "#00205B",
+        "#4CC8F2",
+        "#8BCB6A",
+        "#0077B3"
+      ],
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED",
+      "fontFamily": "Open Sans",
+      "widgetPadding": 12,
+      "widgetMargin": 8,
+      "widgetCornerRadius": 8,
+      "widgetShadow": 10,
+      "fontSettings": {
+        "base": {
+          "fontFamily": "Open Sans",
+          "fontColor": {
+            "light": "#00205B"
+          },
+          "fontSize": 13
+        },
+        "widgetTitle": {
+          "fontColor": {
+            "light": "#003399"
+          },
+          "fontWeight": 600
+        }
+      },
+      "gridLineColor": {
+        "light": "#E8F0F5"
+      },
+      "axisLineColor": {
+        "light": "#B0C9D9"
+      }
+    },
+    "applyModeEnabled": false
+  }
+}

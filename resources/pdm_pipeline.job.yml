@@ -1,0 +1,29 @@
+resources:
+  jobs:
+    engie_peru_pdm_pipeline:
+      name: "Engie Peru - PdM Aerogeneradores POC"
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tasks:
+        - task_key: ingest_features
+          notebook_task:
+            notebook_path: ../notebooks/01_ingest_features.py
+            source: WORKSPACE
+        - task_key: pdm_model
+          depends_on:
+            - task_key: ingest_features
+          notebook_task:
+            notebook_path: ../notebooks/02_pdm_model.py
+            source: WORKSPACE
+
+    engie_peru_pdm_wrap_proba:
+      name: "Engie PdM - proba wrapper"
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tasks:
+        - task_key: wrap
+          notebook_task:
+            notebook_path: ../notebooks/03_wrap_proba.py
+            source: WORKSPACE

@@ -1,0 +1,32 @@
+bundle:
+  name: engie-peru-pdm
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog donde se crean tablas y modelos
+    default: serverless_stable_cvpomp_catalog
+  schema:
+    description: Schema del proyecto PdM
+    default: engie_peru_pdm
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://fevm-serverless-stable-cvpomp.cloud.databricks.com
+    variables:
+      catalog: serverless_stable_cvpomp_catalog
+      schema: engie_peru_pdm
+
+  prod:
+    mode: production
+    workspace:
+      host: https://fevm-serverless-stable-cvpomp.cloud.databricks.com
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: serverless_stable_cvpomp_catalog
+      schema: engie_peru_pdm
