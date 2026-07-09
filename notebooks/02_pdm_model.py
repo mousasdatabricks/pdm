@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Engie Perú · Mantenimiento Predictivo Aerogeneradores
+# MAGIC # Mantenimiento Predictivo Aerogeneradores
 # MAGIC ## 02 · Modelo · NBM + Detección de derateo + Alerta temprana
 # MAGIC
 # MAGIC **Enfoque (alineado al acelerador oficial de Databricks para Wind Turbines):**

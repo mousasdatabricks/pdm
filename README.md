@@ -1,4 +1,4 @@
-# Engie Perú · Mantenimiento Predictivo Aerogeneradores
+# Mantenimiento Predictivo Aerogeneradores
 
 POC de **mantenimiento predictivo** para parque eólico (aerogeneradores AEG_51 y AEG_52) usando datos SCADA reales. Detecta **derateo** (sub-desempeño) y genera **alertas tempranas** semanas antes del evento, siguiendo el enfoque del acelerador oficial de Databricks para turbinas eólicas.
 
@@ -26,7 +26,8 @@ Lakeview Dashboard  →  KPIs, health, energía perdida, alertas
 | `dashboards/engie_peru_pdm.lvdash.json` | Dashboard Lakeview |
 | `sql/01_setup.sql` | Creación de schema y volumen |
 | `resources/pdm_pipeline.job.yml` | Jobs de Databricks (Asset Bundle) |
-| `docs/GUIA-DESPLIEGUE.md` | **Guía paso a paso para principiantes** |
+| `docs/GUIA-DESPLIEGUE-UI.md` | **Guía por interfaz gráfica (sin terminal)** |
+| `docs/GUIA-DESPLIEGUE.md` | Guía con CLI + Asset Bundle |
 
 ## Tablas Unity Catalog (generadas por los notebooks)
 
@@ -44,14 +45,18 @@ Lakeview Dashboard  →  KPIs, health, energía perdida, alertas
 - **Modelo UC:** `<catalog>.engie_peru_pdm.derate_early_warning`
 - **Endpoint:** `engie-peru-derate-ew` (devuelve probabilidad de derateo en 72 h)
 
-## Despliegue rápido
+## Despliegue
+
+| Perfil | Guía |
+|--------|------|
+| **Interfaz gráfica (sin terminal)** | **[docs/GUIA-DESPLIEGUE-UI.md](docs/GUIA-DESPLIEGUE-UI.md)** |
+| **CLI + Asset Bundle** | [docs/GUIA-DESPLIEGUE.md](docs/GUIA-DESPLIEGUE.md) |
+
+Resumen CLI:
 
 ```bash
 git clone https://github.com/mousasdatabricks/pdm.git
 cd pdm
-
-# Ver guía completa para principiantes:
-# docs/GUIA-DESPLIEGUE.md
 
 databricks auth login --host https://TU-WORKSPACE.cloud.databricks.com --profile tu-perfil
 databricks bundle validate -t dev -p tu-perfil

@@ -1,4 +1,4 @@
--- Engie Perú · Mantenimiento Predictivo Aerogeneradores
+-- Mantenimiento Predictivo Aerogeneradores
 -- Script inicial: catálogo, schema y volumen para datos SCADA crudos.
 --
 -- Ajusta los nombres según tu entorno antes de ejecutar.
@@ -7,7 +7,7 @@
 -- USE CATALOG <tu_catalogo>;
 
 CREATE SCHEMA IF NOT EXISTS engie_peru_pdm
-  COMMENT 'POC Mantenimiento Predictivo — Aerogeneradores Engie Perú';
+  COMMENT 'POC Mantenimiento Predictivo — Aerogeneradores';
 
 USE SCHEMA engie_peru_pdm;
 
