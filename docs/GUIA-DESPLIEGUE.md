@@ -1,6 +1,9 @@
-# Guía de despliegue — Engie Perú PdM (para principiantes)
+# Guía de despliegue — Engie Perú PdM (CLI + Asset Bundle)
 
-Esta guía explica cómo desplegar el proyecto **Mantenimiento Predictivo Aerogeneradores** en un workspace de Databricks, sin asumir experiencia previa con Asset Bundles ni MLflow.
+Esta guía explica cómo desplegar el proyecto **Mantenimiento Predictivo Aerogeneradores** usando la **Databricks CLI** y **Asset Bundles**.
+
+> **¿Prefieres solo la interfaz web, sin terminal?**  
+> Usa la guía detallada: **[GUIA-DESPLIEGUE-UI.md](./GUIA-DESPLIEGUE-UI.md)**
 
 **Tiempo estimado:** 45–90 minutos (primera vez).
 
